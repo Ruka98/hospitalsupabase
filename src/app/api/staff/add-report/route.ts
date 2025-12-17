@@ -13,7 +13,7 @@ const Schema = z.object({
 
 export async function POST(req: Request) {
   const user = await requireUser();
-  requireStaffRole(user, ["nurse","radiologist","doctor"]);
+  requireStaffRole(user, ["nurse","radiologist","doctor","lab","pharmacist"]);
 
   const form = await req.formData();
   const uploadedFile = form.get("file") as File | null;
@@ -68,6 +68,25 @@ export async function POST(req: Request) {
   if (error) {
     console.error(error);
     return NextResponse.json({ error: "DB Error" }, { status: 500 });
+  }
+
+  const { data: assignmentDoctors } = await sb
+    .from("assignments")
+    .select("doctor_id,patient_id,patients(name)")
+    .eq("patient_id", parsed.data.patient_id);
+  const patientLabel = assignmentDoctors?.[0]?.patients?.name
+    ? `${assignmentDoctors[0].patients.name} (#${parsed.data.patient_id})`
+    : `patient #${parsed.data.patient_id}`;
+  const doctorIds = Array.from(new Set((assignmentDoctors || []).map((a:any) => a.doctor_id).filter(Boolean)));
+  if (doctorIds.length) {
+    const notifs = doctorIds.map((docId) => ({
+      recipient_staff_id: docId,
+      title: "New report uploaded",
+      message: `${patientLabel}: ${parsed.data.report_type} added by ${user.staff.name}.`,
+      related_assignment_id: null
+    }));
+    const { error: notifErr } = await sb.from("notifications").insert(notifs);
+    if (notifErr) console.error(notifErr);
   }
 
   // Support both redirect (old behavior) and JSON (new behavior)

@@ -6,7 +6,7 @@ import { hashPassword } from "@/lib/security";
 
 const Schema = z.object({
   name: z.string().min(1),
-  role: z.enum(["admin","doctor","nurse","radiologist"]),
+  role: z.enum(["admin","doctor","nurse","radiologist","lab","pharmacist"]),
   category: z.string().optional().nullable(),
   username: z.string().min(1),
   password: z.string().min(4),

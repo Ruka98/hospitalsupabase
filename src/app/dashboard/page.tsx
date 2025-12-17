@@ -23,7 +23,7 @@ export default async function Dashboard() {
   }
 
   const staffRole = user.userType === "staff" ? user.staff.role : null;
-  const showClinicalWorkspace = user.userType === "staff" && ["doctor", "nurse", "radiologist"].includes(staffRole ?? "");
+  const showClinicalWorkspace = user.userType === "staff" && ["doctor", "nurse", "radiologist", "lab", "pharmacist"].includes(staffRole ?? "");
 
   return (
     <div className="container">
@@ -36,7 +36,7 @@ export default async function Dashboard() {
           <Link href="/dashboard">Dashboard</Link>
           {user.userType === "staff" && staffRole === "admin" && <Link href="/admin">Admin</Link>}
           {user.userType === "staff" && staffRole === "doctor" && <Link href="/doctor">Doctor</Link>}
-          {showClinicalWorkspace && <Link href="/staff">Clinical Docs</Link>}
+          {showClinicalWorkspace && <Link href="/staff">Staff Tasks</Link>}
           {user.userType === "patient" && <Link href="/patient">Patient</Link>}
           <form action="/api/auth/logout" method="post">
             <button className="secondary" type="submit">Logout</button>

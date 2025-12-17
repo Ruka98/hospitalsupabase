@@ -7,7 +7,7 @@
 create table if not exists staff (
   id bigserial primary key,
   name text not null,
-  role text not null check (role in ('admin','doctor','nurse','radiologist')),
+  role text not null check (role in ('admin','doctor','nurse','radiologist','lab','pharmacist')),
   category text,
   username text not null unique,
   password_hash text not null,
@@ -34,8 +34,10 @@ create table if not exists assignments (
   doctor_id bigint not null references staff(id) on delete restrict,
   nurse_id bigint references staff(id) on delete set null,
   radiologist_id bigint references staff(id) on delete set null,
+  lab_staff_id bigint references staff(id) on delete set null,
+  pharmacist_id bigint references staff(id) on delete set null,
   service_type text not null, -- e.g., 'ECG', 'Cardio', 'X-Ray', 'CT'
-  status text not null default 'assigned' check (status in ('assigned','in_progress','done','cancelled')),
+  status text not null default 'assigned' check (status in ('assigned','in_progress','completed','cancelled')),
   notes text,
   created_at timestamptz not null default now()
 );
@@ -77,3 +79,4 @@ create index if not exists idx_sessions_expires on sessions(expires_at);
 create index if not exists idx_notifications_recipient on notifications(recipient_staff_id, is_read);
 create index if not exists idx_reports_patient on reports(patient_id, created_at);
 create index if not exists idx_assignments_patient on assignments(patient_id, created_at);
+create index if not exists idx_assignments_staff on assignments(doctor_id, nurse_id, radiologist_id, lab_staff_id, pharmacist_id);

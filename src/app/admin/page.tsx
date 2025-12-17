@@ -33,6 +33,8 @@ export default async function AdminPage() {
                   <option value="doctor">Doctor (Physician)</option>
                   <option value="nurse">Nurse</option>
                   <option value="radiologist">Radiologist</option>
+                  <option value="lab">Lab Staff / Technologist</option>
+                  <option value="pharmacist">Pharmacist</option>
                   <option value="admin">Admin / Operations</option>
                 </select>
               </div>
