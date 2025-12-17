@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
     if (uploadError) {
       console.error(uploadError);
-      return NextResponse.redirect(new URL("/staff?error=upload_failed", req.url), { status: 303 });
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 
     const { data: publicUrlData } = sb.storage.from(bucket).getPublicUrl(filePath);
@@ -65,6 +65,17 @@ export async function POST(req: Request) {
     file_url: fileUrl
   });
 
-  if (error) console.error(error);
+  if (error) {
+    console.error(error);
+    return NextResponse.json({ error: "DB Error" }, { status: 500 });
+  }
+
+  // Support both redirect (old behavior) and JSON (new behavior)
+  // Check Accept header
+  const accept = req.headers.get("accept");
+  if (accept && accept.includes("application/json")) {
+    return NextResponse.json({ success: true });
+  }
+
   return NextResponse.redirect(new URL("/staff", req.url), { status: 303 });
 }
