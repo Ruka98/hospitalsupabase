@@ -11,10 +11,20 @@ export default async function DoctorPage() {
   const { data: patients } = await sb.from("patients").select("id,name,age,gender,phone").order("created_at", { ascending: false }).limit(100);
   const { data: nurses } = await sb.from("staff").select("id,name,category,is_available").eq("role", "nurse").eq("is_available", true).order("created_at", { ascending: false });
   const { data: radiologists } = await sb.from("staff").select("id,name,category,is_available").eq("role", "radiologist").eq("is_available", true).order("created_at", { ascending: false });
+  const { data: labStaff } = await sb.from("staff").select("id,name,category,is_available").eq("role", "lab").eq("is_available", true).order("created_at", { ascending: false });
+  const { data: pharmacists } = await sb.from("staff").select("id,name,category,is_available").eq("role", "pharmacist").eq("is_available", true).order("created_at", { ascending: false });
 
   const { data: assignments } = await sb
     .from("assignments")
-    .select("id,service_type,status,created_at,patient_id,doctor_id,nurse_id,radiologist_id,patients(name),staff!assignments_nurse_id_fkey(name),staff!assignments_radiologist_id_fkey(name)")
+    .select(`
+      id,service_type,status,created_at,patient_id,doctor_id,nurse_id,radiologist_id,lab_staff_id,pharmacist_id,notes,
+      patients(name),
+      doctor:staff!assignments_doctor_id_fkey(name),
+      nurse:staff!assignments_nurse_id_fkey(name),
+      radiologist:staff!assignments_radiologist_id_fkey(name),
+      lab:staff!assignments_lab_staff_id_fkey(name),
+      pharmacist:staff!assignments_pharmacist_id_fkey(name)
+    `)
     .eq("doctor_id", user.staff.id)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -32,7 +42,7 @@ export default async function DoctorPage() {
         <div className="grid">
           <div className="card">
             <h3 style={{ marginTop: 0 }}>Assign Patient to Staff</h3>
-            <p><small className="muted">Assign a nurse or radiologist and they will be notified instantly.</small></p>
+            <p><small className="muted">Send tasks to nurses, radiology, lab, or pharmacy with automatic notifications.</small></p>
             <form action="/api/doctor/create-assignment" method="post" className="grid">
               <div>
                 <label>Patient</label>
@@ -51,13 +61,13 @@ export default async function DoctorPage() {
                   <select name="status" defaultValue="assigned">
                     <option value="assigned">assigned</option>
                     <option value="in_progress">in_progress</option>
-                    <option value="done">done</option>
+                    <option value="completed">completed</option>
                     <option value="cancelled">cancelled</option>
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-2">
+              <div className="grid grid-2" style={{ gap: 10 }}>
                 <div>
                   <label>Nurse (optional, available only)</label>
                   <select name="nurse_id" defaultValue="">
@@ -74,13 +84,30 @@ export default async function DoctorPage() {
                 </div>
               </div>
 
+              <div className="grid grid-2" style={{ gap: 10 }}>
+                <div>
+                  <label>Lab Staff (optional)</label>
+                  <select name="lab_staff_id" defaultValue="">
+                    <option value="">None</option>
+                    {(labStaff ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label>Pharmacist (optional)</label>
+                  <select name="pharmacist_id" defaultValue="">
+                    <option value="">None</option>
+                    {(pharmacists ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                  </select>
+                </div>
+              </div>
+
               <div>
-                <label>Notes (optional)</label>
-                <textarea name="notes" rows={3} placeholder="Any clinical notes for staff..." />
+                <label>Notes / prescriptions (optional)</label>
+                <textarea name="notes" rows={3} placeholder="Any clinical notes, test instructions, or prescription list" />
               </div>
 
               <button type="submit">Create Assignment</button>
-              <small className="muted">Assigned nurse/radiologist will receive a notification.</small>
+              <small className="muted">Assigned staff will receive a notification.</small>
             </form>
           </div>
 
@@ -129,15 +156,17 @@ export default async function DoctorPage() {
           <div style={{ marginTop: 14 }}>
             <h4 style={{ margin: 0 }}>Your Recent Assignments</h4>
             <table className="table" style={{ marginTop: 8 }}>
-              <thead><tr><th>Patient</th><th>Service</th><th>Status</th><th>Nurse</th><th>Radiologist</th></tr></thead>
+              <thead><tr><th>Patient</th><th>Service</th><th>Status</th><th>Nurse</th><th>Radiologist</th><th>Lab</th><th>Pharmacy</th></tr></thead>
               <tbody>
                 {(assignments ?? []).map((a:any) => (
                   <tr key={a.id}>
                     <td>{a.patients?.name ?? a.patient_id}</td>
                     <td>{a.service_type}</td>
                     <td>{a.status}</td>
-                    <td>{a["staff"]?.name ?? "-"}</td>
-                    <td>{a["staff!assignments_radiologist_id_fkey"]?.name ?? "-"}</td>
+                    <td>{a.nurse?.name ?? "-"}</td>
+                    <td>{a.radiologist?.name ?? "-"}</td>
+                    <td>{a.lab?.name ?? "-"}</td>
+                    <td>{a.pharmacist?.name ?? "-"}</td>
                   </tr>
                 ))}
               </tbody>

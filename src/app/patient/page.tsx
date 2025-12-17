@@ -20,7 +20,14 @@ export default async function PatientPage() {
 
   const { data: assignments } = await sb
     .from("assignments")
-    .select("id,service_type,status,notes,created_at,doctor_id,staff!assignments_doctor_id_fkey(name)")
+    .select(`
+      id,service_type,status,notes,created_at,doctor_id,nurse_id,radiologist_id,lab_staff_id,pharmacist_id,
+      doctor:staff!assignments_doctor_id_fkey(name),
+      nurse:staff!assignments_nurse_id_fkey(name),
+      radiologist:staff!assignments_radiologist_id_fkey(name),
+      lab:staff!assignments_lab_staff_id_fkey(name),
+      pharmacist:staff!assignments_pharmacist_id_fkey(name)
+    `)
     .eq("patient_id", user.patient.id)
     .order("created_at", { ascending: false });
 
@@ -53,13 +60,21 @@ export default async function PatientPage() {
             <p><small className="muted">No assigned services yet.</small></p>
           ) : (
             <table className="table">
-              <thead><tr><th>Service</th><th>Status</th><th>Doctor</th><th>Notes</th></tr></thead>
+              <thead><tr><th>Service</th><th>Status</th><th>Doctor</th><th>Care Team</th><th>Notes</th></tr></thead>
               <tbody>
                 {assignments.map((a:any) => (
                   <tr key={a.id}>
                     <td>{a.service_type}</td>
-                    <td>{a.status}</td>
-                    <td>{a["staff"]?.name ?? "-"}</td>
+                    <td><span className="badge">{a.status}</span></td>
+                    <td>{a.doctor?.name ?? "-"}</td>
+                    <td style={{ maxWidth: 220 }}>
+                      <small className="muted">
+                        Nurse: {a.nurse?.name ?? "-"} • Radiology: {a.radiologist?.name ?? "-"}
+                      </small><br />
+                      <small className="muted">
+                        Lab: {a.lab?.name ?? "-"} • Pharmacy: {a.pharmacist?.name ?? "-"}
+                      </small>
+                    </td>
                     <td>{a.notes ?? "-"}</td>
                   </tr>
                 ))}

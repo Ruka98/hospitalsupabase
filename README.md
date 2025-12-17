@@ -7,18 +7,22 @@ This is a **fully working** Hospital Management System built with:
 
 ## Features
 ### Admin
-- Add Staff (Doctor / Nurse / Radiologist / Admin)
+- Add Staff (Doctor / Nurse / Radiologist / Lab / Pharmacist / Admin)
 - Add Patients
 - View recent staff & patients
 
 ### Doctor
-- Assign patients to **available** nurses and/or radiologists
-- Choose service type (ECG, Cardio, X-Ray, etc.)
+- Assign patients to **available** nurses, radiologists, lab staff, or pharmacists
+- Choose service type (ECG, Cardio, X-Ray, Pharmacy request, etc.)
 - View patient history (assignments + reports)
 
-### Nurse / Radiologist
-- View assigned work
+### Nurse / Radiologist / Lab
+- View assigned work with ticket statuses (assigned → in progress → completed)
 - Add reports / scan results to patient history (optional attachment URL)
+
+### Pharmacist
+- Receive prescription tasks from doctors
+- Mark medicines as dispensed / completed for doctor visibility
 
 ### Patient
 - Login and view assigned services + reports

@@ -25,7 +25,14 @@ export default async function PatientHistoryPage({ searchParams }: { searchParam
   const { data: patient } = await sb.from("patients").select("id,name,age,gender,phone,address,created_at").eq("id", patientId).maybeSingle();
   const { data: assignments } = await sb
     .from("assignments")
-    .select("id,service_type,status,notes,created_at,doctor_id,nurse_id,radiologist_id,staff!assignments_doctor_id_fkey(name),staff!assignments_nurse_id_fkey(name),staff!assignments_radiologist_id_fkey(name)")
+    .select(`
+      id,service_type,status,notes,created_at,doctor_id,nurse_id,radiologist_id,lab_staff_id,pharmacist_id,
+      doctor:staff!assignments_doctor_id_fkey(name),
+      nurse:staff!assignments_nurse_id_fkey(name),
+      radiologist:staff!assignments_radiologist_id_fkey(name),
+      lab:staff!assignments_lab_staff_id_fkey(name),
+      pharmacist:staff!assignments_pharmacist_id_fkey(name)
+    `)
     .eq("patient_id", patientId)
     .order("created_at", { ascending: false });
 
@@ -57,15 +64,17 @@ export default async function PatientHistoryPage({ searchParams }: { searchParam
             <p><small className="muted">No assignments yet.</small></p>
           ) : (
             <table className="table">
-              <thead><tr><th>Service</th><th>Status</th><th>Doctor</th><th>Nurse</th><th>Radiologist</th></tr></thead>
+              <thead><tr><th>Service</th><th>Status</th><th>Doctor</th><th>Nurse</th><th>Radiologist</th><th>Lab</th><th>Pharmacy</th></tr></thead>
               <tbody>
                 {assignments.map((a:any) => (
                   <tr key={a.id}>
                     <td>{a.service_type}</td>
                     <td><span className="badge">{a.status}</span></td>
-                    <td>{a["staff"]?.name ?? "-"}</td>
-                    <td>{a["staff!assignments_nurse_id_fkey"]?.name ?? "-"}</td>
-                    <td>{a["staff!assignments_radiologist_id_fkey"]?.name ?? "-"}</td>
+                    <td>{a.doctor?.name ?? "-"}</td>
+                    <td>{a.nurse?.name ?? "-"}</td>
+                    <td>{a.radiologist?.name ?? "-"}</td>
+                    <td>{a.lab?.name ?? "-"}</td>
+                    <td>{a.pharmacist?.name ?? "-"}</td>
                   </tr>
                 ))}
               </tbody>
