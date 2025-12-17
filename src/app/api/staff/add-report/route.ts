@@ -74,10 +74,15 @@ export async function POST(req: Request) {
     .from("assignments")
     .select("doctor_id,patient_id,patients(name)")
     .eq("patient_id", parsed.data.patient_id);
-  const patientLabel = assignmentDoctors?.[0]?.patients?.name
-    ? `${assignmentDoctors[0].patients.name} (#${parsed.data.patient_id})`
+
+  // Type assertion for Supabase join result
+  const assignmentsAny = assignmentDoctors as any[] | null;
+  const firstAssignment = assignmentsAny?.[0];
+
+  const patientLabel = firstAssignment?.patients?.name
+    ? `${firstAssignment.patients.name} (#${parsed.data.patient_id})`
     : `patient #${parsed.data.patient_id}`;
-  const doctorIds = Array.from(new Set((assignmentDoctors || []).map((a:any) => a.doctor_id).filter(Boolean)));
+  const doctorIds = Array.from(new Set((assignmentsAny || []).map((a:any) => a.doctor_id).filter(Boolean)));
   if (doctorIds.length) {
     const notifs = doctorIds.map((docId) => ({
       recipient_staff_id: docId,
