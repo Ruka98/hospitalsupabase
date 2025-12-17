@@ -1,0 +1,84 @@
+import React from "react";
+import Link from "next/link";
+import { requireUser } from "@/lib/guards";
+import { supabaseAdmin } from "@/lib/supabase";
+
+export default async function PatientPage() {
+  const user = await requireUser();
+  if (user.userType !== "patient") {
+    // staff shouldn't use this page
+    return (
+      <div className="container">
+        <div className="card"><p>Forbidden</p></div>
+      </div>
+    );
+  }
+
+  const sb = supabaseAdmin();
+
+  const { data: assignments } = await sb
+    .from("assignments")
+    .select("id,service_type,status,notes,created_at,doctor_id,staff!assignments_doctor_id_fkey(name)")
+    .eq("patient_id", user.patient.id)
+    .order("created_at", { ascending: false });
+
+  const { data: reports } = await sb
+    .from("reports")
+    .select("id,report_type,summary,file_url,created_at,created_by_staff_id,staff(name)")
+    .eq("patient_id", user.patient.id)
+    .order("created_at", { ascending: false });
+
+  return (
+    <div className="container">
+      <div className="nav">
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <Link href="/dashboard">← Back</Link>
+          <strong>Patient Portal</strong>
+        </div>
+      </div>
+
+      <div className="grid grid-2">
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>My Clinic / Assigned Services</h3>
+          {(!assignments || assignments.length === 0) ? (
+            <p><small className="muted">No assigned services yet.</small></p>
+          ) : (
+            <table className="table">
+              <thead><tr><th>Service</th><th>Status</th><th>Doctor</th><th>Notes</th></tr></thead>
+              <tbody>
+                {assignments.map((a:any) => (
+                  <tr key={a.id}>
+                    <td>{a.service_type}</td>
+                    <td>{a.status}</td>
+                    <td>{a["staff"]?.name ?? "-"}</td>
+                    <td>{a.notes ?? "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>My Reports</h3>
+          {(!reports || reports.length === 0) ? (
+            <p><small className="muted">No reports yet.</small></p>
+          ) : (
+            <div className="grid">
+              {reports.map((r:any) => (
+                <div key={r.id} style={{ border: "1px solid #eef0f6", borderRadius: 12, padding: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                    <strong>{r.report_type}</strong>
+                    <small className="muted">{new Date(r.created_at).toLocaleString()}</small>
+                  </div>
+                  <p style={{ marginTop: 8, marginBottom: 8 }}>{r.summary}</p>
+                  {r.file_url ? <a className="badge" href={r.file_url} target="_blank" rel="noreferrer">Open attachment</a> : <small className="muted">No attachment link</small>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
