@@ -68,11 +68,18 @@ export default async function PatientPage() {
               {reports.map((r:any) => (
                 <div key={r.id} style={{ border: "1px solid #eef0f6", borderRadius: 12, padding: 10 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                    <strong>{r.report_type}</strong>
-                    <small className="muted">{new Date(r.created_at).toLocaleString()}</small>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <span className="badge emphasis">{r.report_type}</span>
+                      <small className="muted">{new Date(r.created_at).toLocaleString()}</small>
+                    </div>
+                    <small className="muted">By: {r.staff?.name ?? "Hospital staff"}</small>
                   </div>
                   <p style={{ marginTop: 8, marginBottom: 8 }}>{r.summary}</p>
-                  {r.file_url ? <a className="badge" href={r.file_url} target="_blank" rel="noreferrer">Open attachment</a> : <small className="muted">No attachment link</small>}
+                  {r.file_url ? (
+                    <a className="badge" href={r.file_url} target="_blank" rel="noreferrer">Open scan / image</a>
+                  ) : (
+                    <small className="muted">No attachment link</small>
+                  )}
                 </div>
               ))}
             </div>

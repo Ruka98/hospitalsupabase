@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/guards";
 import { supabaseAdmin } from "@/lib/supabase";
 
 function RoleBadge({ text }: { text: string }) {
-  return <span className="badge">{text}</span>;
+  return <span className="badge emphasis">{text}</span>;
 }
 
 export default async function Dashboard() {
@@ -22,6 +22,9 @@ export default async function Dashboard() {
     notifications = data ?? [];
   }
 
+  const staffRole = user.userType === "staff" ? user.staff.role : null;
+  const showClinicalWorkspace = user.userType === "staff" && ["doctor", "nurse", "radiologist"].includes(staffRole ?? "");
+
   return (
     <div className="container">
       <div className="nav">
@@ -31,9 +34,9 @@ export default async function Dashboard() {
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <Link href="/dashboard">Dashboard</Link>
-          {user.userType === "staff" && user.staff.role === "admin" && <Link href="/admin">Admin</Link>}
-          {user.userType === "staff" && user.staff.role === "doctor" && <Link href="/doctor">Doctor</Link>}
-          {user.userType === "staff" && (user.staff.role === "nurse" || user.staff.role === "radiologist") && <Link href="/staff">Staff</Link>}
+          {user.userType === "staff" && staffRole === "admin" && <Link href="/admin">Admin</Link>}
+          {user.userType === "staff" && staffRole === "doctor" && <Link href="/doctor">Doctor</Link>}
+          {showClinicalWorkspace && <Link href="/staff">Clinical Docs</Link>}
           {user.userType === "patient" && <Link href="/patient">Patient</Link>}
           <form action="/api/auth/logout" method="post">
             <button className="secondary" type="submit">Logout</button>
@@ -48,6 +51,11 @@ export default async function Dashboard() {
             <>
               <p><strong>{user.staff.name}</strong></p>
               <p><small className="muted">Role: {user.staff.role}{user.staff.category ? ` • ${user.staff.category}` : ""}</small></p>
+              <div className="pill-group">
+                <span className="badge">Assignments & notifications</span>
+                <span className="badge">Upload reports & scans</span>
+                <span className="badge">Patient history shortcuts</span>
+              </div>
             </>
           ) : (
             <>
@@ -67,7 +75,7 @@ export default async function Dashboard() {
           ) : (
             <div className="grid">
               {notifications.map((n) => (
-                <div key={n.id} style={{ border: "1px solid #eef0f6", borderRadius: 12, padding: 10 }}>
+                <div key={n.id} style={{ border: "1px solid #eef0f6", borderRadius: 12, padding: 10, background: n.is_read ? "#f8fafc" : "#eef2ff" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                     <strong>{n.title}</strong>
                     <span className="badge">{n.is_read ? "read" : "new"}</span>

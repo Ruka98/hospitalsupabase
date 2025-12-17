@@ -32,6 +32,12 @@ export async function POST(req: Request) {
   const radiologistId = parsed.data.radiologist_id ? Number(parsed.data.radiologist_id) : null;
 
   const sb = supabaseAdmin();
+  const { data: patient } = await sb
+    .from("patients")
+    .select("name")
+    .eq("id", parsed.data.patient_id)
+    .maybeSingle();
+
   const { data: inserted, error } = await sb
     .from("assignments")
     .insert({
@@ -52,6 +58,7 @@ export async function POST(req: Request) {
   }
 
   const assignmentId = inserted.id as number;
+  const patientLabel = patient?.name ? `${patient.name} (#${parsed.data.patient_id})` : `patient #${parsed.data.patient_id}`;
 
   // Notify assigned staff
   const notifs: any[] = [];
@@ -59,7 +66,7 @@ export async function POST(req: Request) {
     notifs.push({
       recipient_staff_id: nurseId,
       title: "New Nurse Assignment",
-      message: `You have been assigned to patient #${parsed.data.patient_id} for ${parsed.data.service_type}.`,
+      message: `You have been assigned to ${patientLabel} for ${parsed.data.service_type}. Assigned by ${user.staff.name}.`,
       related_assignment_id: assignmentId
     });
   }
@@ -67,7 +74,7 @@ export async function POST(req: Request) {
     notifs.push({
       recipient_staff_id: radiologistId,
       title: "New Radiology Assignment",
-      message: `You have been assigned to patient #${parsed.data.patient_id} for ${parsed.data.service_type}.`,
+      message: `You have been assigned to ${patientLabel} for ${parsed.data.service_type}. Assigned by ${user.staff.name}.`,
       related_assignment_id: assignmentId
     });
   }

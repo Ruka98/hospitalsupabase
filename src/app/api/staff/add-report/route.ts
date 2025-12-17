@@ -12,7 +12,7 @@ const Schema = z.object({
 
 export async function POST(req: Request) {
   const user = await requireUser();
-  requireStaffRole(user, ["nurse","radiologist"]);
+  requireStaffRole(user, ["nurse","radiologist","doctor"]);
 
   const form = await req.formData();
   const parsed = Schema.safeParse({

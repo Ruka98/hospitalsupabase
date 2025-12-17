@@ -62,7 +62,7 @@ export default async function PatientHistoryPage({ searchParams }: { searchParam
                 {assignments.map((a:any) => (
                   <tr key={a.id}>
                     <td>{a.service_type}</td>
-                    <td>{a.status}</td>
+                    <td><span className="badge">{a.status}</span></td>
                     <td>{a["staff"]?.name ?? "-"}</td>
                     <td>{a["staff!assignments_nurse_id_fkey"]?.name ?? "-"}</td>
                     <td>{a["staff!assignments_radiologist_id_fkey"]?.name ?? "-"}</td>
@@ -82,13 +82,15 @@ export default async function PatientHistoryPage({ searchParams }: { searchParam
               {reports.map((r:any) => (
                 <div key={r.id} style={{ border: "1px solid #eef0f6", borderRadius: 12, padding: 10 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                    <strong>{r.report_type}</strong>
-                    <small className="muted">{new Date(r.created_at).toLocaleString()}</small>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <span className="badge emphasis">{r.report_type}</span>
+                      <small className="muted">{new Date(r.created_at).toLocaleString()}</small>
+                    </div>
                   </div>
                   <p style={{ marginTop: 8, marginBottom: 8 }}>{r.summary}</p>
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <span className="badge">By: {r.staff?.name ?? "Unknown"}</span>
-                    {r.file_url ? <a className="badge" href={r.file_url} target="_blank" rel="noreferrer">Attachment</a> : null}
+                    {r.file_url ? <a className="badge" href={r.file_url} target="_blank" rel="noreferrer">Scan / attachment</a> : <small className="muted">No attachment</small>}
                   </div>
                 </div>
               ))}
