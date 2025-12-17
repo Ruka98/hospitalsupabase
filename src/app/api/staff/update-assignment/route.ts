@@ -54,8 +54,10 @@ export async function POST(req: Request) {
   }
 
   if (parsed.data.status === "completed" && assignment.doctor_id) {
-    const patientLabel = assignment.patients?.name
-      ? `${assignment.patients.name} (#${assignment.patient_id})`
+    // Type assertion for joined table result
+    const patientsAny = assignment.patients as any;
+    const patientLabel = patientsAny?.name
+      ? `${patientsAny.name} (#${assignment.patient_id})`
       : `patient #${assignment.patient_id}`;
     const { error: notifErr } = await sb.from("notifications").insert({
       recipient_staff_id: assignment.doctor_id,

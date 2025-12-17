@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { requireUser, requireStaffRole } from "@/lib/guards";
 import { supabaseAdmin } from "@/lib/supabase";
+import StaffReportForm from "../staff/StaffReportForm"; // Reuse the form for uploads
 
 export default async function DoctorPage() {
   const user = await requireUser();
@@ -32,21 +33,22 @@ export default async function DoctorPage() {
   return (
     <div className="container">
       <div className="nav">
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
           <Link href="/dashboard">← Back</Link>
-          <strong>Doctor Panel</strong>
+          <strong>Doctor Workspace</strong>
         </div>
       </div>
 
       <div className="grid grid-2">
         <div className="grid">
           <div className="card">
-            <h3 style={{ marginTop: 0 }}>Assign Patient to Staff</h3>
-            <p><small className="muted">Send tasks to nurses, radiology, lab, or pharmacy with automatic notifications.</small></p>
+            <h3>Assign Patient Task</h3>
+            <p className="muted text-sm" style={{marginBottom: "1.5rem"}}>Delegate tasks to specialized staff members. They will be notified immediately.</p>
             <form action="/api/doctor/create-assignment" method="post" className="grid">
               <div>
-                <label>Patient</label>
+                <label>Select Patient</label>
                 <select name="patient_id" required>
+                  <option value="">-- Select Patient --</option>
                   {(patients ?? []).map((p:any) => <option key={p.id} value={p.id}>{p.name} (#{p.id})</option>)}
                 </select>
               </div>
@@ -54,125 +56,125 @@ export default async function DoctorPage() {
               <div className="grid grid-2">
                 <div>
                   <label>Service Type</label>
-                  <input name="service_type" placeholder="ECG / Cardio / X-Ray / CT ..." required />
+                  <input name="service_type" placeholder="e.g. ECG, X-Ray, Blood Test" required />
                 </div>
                 <div>
-                  <label>Status</label>
+                  <label>Initial Status</label>
                   <select name="status" defaultValue="assigned">
-                    <option value="assigned">assigned</option>
-                    <option value="in_progress">in_progress</option>
-                    <option value="completed">completed</option>
-                    <option value="cancelled">cancelled</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-2" style={{ gap: 10 }}>
-                <div>
-                  <label>Nurse (optional, available only)</label>
-                  <select name="nurse_id" defaultValue="">
-                    <option value="">None</option>
-                    {(nurses ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label>Radiologist (optional, available only)</label>
-                  <select name="radiologist_id" defaultValue="">
-                    <option value="">None</option>
-                    {(radiologists ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-2" style={{ gap: 10 }}>
-                <div>
-                  <label>Lab Staff (optional)</label>
-                  <select name="lab_staff_id" defaultValue="">
-                    <option value="">None</option>
-                    {(labStaff ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label>Pharmacist (optional)</label>
-                  <select name="pharmacist_id" defaultValue="">
-                    <option value="">None</option>
-                    {(pharmacists ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
-                  </select>
+              <div style={{border: "1px solid #e2e8f0", padding: "1rem", borderRadius: "0.5rem", background: "#f8fafc"}}>
+                <label style={{marginBottom: "0.5rem"}}>Assign To (Select at least one)</label>
+                <div className="grid grid-2" style={{ gap: "1rem" }}>
+                  <div>
+                    <label className="text-sm muted">Nurse</label>
+                    <select name="nurse_id" defaultValue="">
+                      <option value="">None</option>
+                      {(nurses ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm muted">Radiologist</label>
+                    <select name="radiologist_id" defaultValue="">
+                      <option value="">None</option>
+                      {(radiologists ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm muted">Lab Staff</label>
+                    <select name="lab_staff_id" defaultValue="">
+                      <option value="">None</option>
+                      {(labStaff ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm muted">Pharmacist</label>
+                    <select name="pharmacist_id" defaultValue="">
+                      <option value="">None</option>
+                      {(pharmacists ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
 
               <div>
-                <label>Notes / prescriptions (optional)</label>
-                <textarea name="notes" rows={3} placeholder="Any clinical notes, test instructions, or prescription list" />
+                <label>Clinical Notes / Instructions</label>
+                <textarea name="notes" rows={3} placeholder="Add specific instructions, symptoms, or what to look for..." />
               </div>
 
-              <button type="submit">Create Assignment</button>
-              <small className="muted">Assigned staff will receive a notification.</small>
+              <button type="submit" style={{width: "100%"}}>Create Assignment & Notify Staff</button>
+            </form>
+          </div>
+
+          {/* Reusing the StaffReportForm component for Doctors as well, since they also need to upload things */}
+          <StaffReportForm patients={patients || []} userRole="doctor" />
+        </div>
+
+        <div className="grid" style={{alignContent: "start"}}>
+          <div className="card">
+            <h3>Patient Records</h3>
+            <p className="muted text-sm" style={{marginBottom: "1rem"}}>View full history, past reports, and uploaded scans.</p>
+            <form action="/patient-history" method="get" className="grid" style={{gap: "0.5rem"}}>
+              <div style={{display: "flex", gap: "0.5rem"}}>
+                <select name="patient_id" required style={{flex: 1}}>
+                  <option value="">-- Select Patient to View History --</option>
+                  {(patients ?? []).map((p:any) => <option key={p.id} value={p.id}>{p.name} (#{p.id})</option>)}
+                </select>
+                <button type="submit" className="secondary">Go</button>
+              </div>
             </form>
           </div>
 
           <div className="card">
-            <h3 style={{ marginTop: 0 }}>Document & upload</h3>
-            <p><small className="muted">Add a clinical note, scan link, or imaging report directly to the patient record.</small></p>
-            <form action="/api/staff/add-report" method="post" className="grid">
-              <div className="grid grid-2">
-                <div>
-                  <label>Patient</label>
-                  <select name="patient_id" required>
-                    {(patients ?? []).map((p:any) => <option key={p.id} value={p.id}>{p.name} (#{p.id})</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label>Report Type</label>
-                  <input name="report_type" placeholder="Clinical note / Imaging / Scan" required />
-                </div>
-              </div>
-              <div>
-                <label>Summary</label>
-                <textarea name="summary" rows={4} placeholder="Key findings, impressions, or bedside updates" required />
-              </div>
-              <div>
-                <label>Attachment or scan URL</label>
-                <input name="file_url" placeholder="Paste image, PDF, or cloud drive link to the scan" />
-                <small className="muted">Use any secure file URL (PACS viewer, Drive, etc.).</small>
-              </div>
-              <button type="submit">Save report to chart</button>
-            </form>
-          </div>
-        </div>
-
-        <div className="card">
-          <h3 style={{ marginTop: 0 }}>View Patient History</h3>
-          <form action="/patient-history" method="get" className="grid">
-            <div>
-              <label>Patient</label>
-              <select name="patient_id" required>
-                {(patients ?? []).map((p:any) => <option key={p.id} value={p.id}>{p.name} (#{p.id})</option>)}
-              </select>
+            <div className="section-header">
+              <h3 style={{marginBottom: 0}}>Recent Assignments</h3>
             </div>
-            <button type="submit">Open History</button>
-          </form>
+            {(!assignments || assignments.length === 0) ? (
+              <p className="muted text-sm">No recent assignments found.</p>
+            ) : (
+              <div style={{overflowX: "auto"}}>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Patient</th>
+                      <th>Service</th>
+                      <th>Status</th>
+                      <th>Assigned To</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(assignments).map((a:any) => {
+                      const assignedTo = [
+                        a.nurse?.name ? `Nurse: ${a.nurse.name}` : null,
+                        a.radiologist?.name ? `Rad: ${a.radiologist.name}` : null,
+                        a.lab?.name ? `Lab: ${a.lab.name}` : null,
+                        a.pharmacist?.name ? `Pharm: ${a.pharmacist.name}` : null,
+                      ].filter(Boolean).join(", ");
 
-          <div style={{ marginTop: 14 }}>
-            <h4 style={{ margin: 0 }}>Your Recent Assignments</h4>
-            <table className="table" style={{ marginTop: 8 }}>
-              <thead><tr><th>Patient</th><th>Service</th><th>Status</th><th>Nurse</th><th>Radiologist</th><th>Lab</th><th>Pharmacy</th></tr></thead>
-              <tbody>
-                {(assignments ?? []).map((a:any) => (
-                  <tr key={a.id}>
-                    <td>{a.patients?.name ?? a.patient_id}</td>
-                    <td>{a.service_type}</td>
-                    <td>{a.status}</td>
-                    <td>{a.nurse?.name ?? "-"}</td>
-                    <td>{a.radiologist?.name ?? "-"}</td>
-                    <td>{a.lab?.name ?? "-"}</td>
-                    <td>{a.pharmacist?.name ?? "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      return (
+                        <tr key={a.id}>
+                          <td>{a.patients?.name ?? a.patient_id}</td>
+                          <td>{a.service_type}</td>
+                          <td>
+                            <span className={`badge ${a.status === 'completed' ? 'success' : a.status === 'in_progress' ? 'emphasis' : ''}`}>
+                              {a.status}
+                            </span>
+                          </td>
+                          <td className="text-sm muted">{assignedTo || "None"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-
         </div>
       </div>
     </div>

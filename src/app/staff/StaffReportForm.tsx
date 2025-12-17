@@ -57,11 +57,9 @@ export default function StaffReportForm({ patients, userRole }: StaffReportFormP
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>Add report / scan result</h3>
-      <p>
-        <small className="muted">
-          Doctors, radiologists, and nursing staff can attach bedside notes, imaging PDFs, or cloud scans directly to the chart. Files upload to secure storage and auto-generate a shareable link tied to your staff username (no login toggle between user types).
-        </small>
+      <h3 style={{ marginTop: 0 }}>Add Clinical Report / Scan</h3>
+      <p className="muted text-sm" style={{ marginBottom: "1.5rem" }}>
+        Attach bedside notes, imaging scans, or reports to the patient's record. Files are stored securely in the "imaging" system.
       </p>
 
       <form onSubmit={handleSubmit} className="grid">
@@ -86,7 +84,7 @@ export default function StaffReportForm({ patients, userRole }: StaffReportFormP
             <label>Report Type</label>
             <input
               name="report_type"
-              placeholder="Nursing Note / Radiology Result / ECG Result"
+              placeholder="e.g. Nursing Note, X-Ray Result, Lab Report"
               required
               value={formData.report_type}
               onChange={(e) => setFormData({ ...formData, report_type: e.target.value })}
@@ -94,11 +92,11 @@ export default function StaffReportForm({ patients, userRole }: StaffReportFormP
           </div>
         </div>
         <div>
-          <label>Summary</label>
+          <label>Summary / Findings</label>
           <textarea
             name="summary"
             rows={4}
-            placeholder="Vitals, impressions, recommendations"
+            placeholder="Enter key findings, impressions, or vital updates..."
             required
             value={formData.summary}
             onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
@@ -110,41 +108,41 @@ export default function StaffReportForm({ patients, userRole }: StaffReportFormP
             <label>Upload Scan/Image</label>
             <UploadWidget
               onUploadComplete={handleUploadComplete}
-              bucket="reports"
+              bucket="imaging"
               folder={formData.patient_id ? `patient-${formData.patient_id}` : undefined}
-              label="Attach scan or report"
+              label="Upload Imaging/Scan"
             />
             {formData.file_url && (
-              <div style={{ marginTop: 10, background: "#f7f9fd", border: "1px solid #e5e8ef", padding: 10, borderRadius: 10 }}>
-                <strong style={{ display: "block" }}>Attached link</strong>
-                <a href={formData.file_url} target="_blank" rel="noreferrer" style={{ wordBreak: "break-all", fontSize: 14 }}>
-                  {formData.file_url}
+              <div style={{ marginTop: "0.75rem", background: "#f0f9ff", border: "1px solid #e2e8f0", padding: "0.75rem", borderRadius: "0.5rem" }}>
+                <strong style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem" }}>File Attached:</strong>
+                <a href={formData.file_url} target="_blank" rel="noreferrer" style={{ wordBreak: "break-all", fontSize: "0.875rem" }}>
+                  View Attachment
                 </a>
-                <div style={{ fontSize: 12, color: "#6b7280" }}>Shareable with the care team.</div>
               </div>
             )}
           </div>
           <div>
-            <label>Or External URL</label>
+            <label>Or External URL (Optional)</label>
             <input
               name="file_url"
               placeholder="https://..."
               value={formData.file_url}
               onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
             />
-            <small className="muted">Will be auto-filled if you upload above.</small>
+            <small className="muted">Use this if the file is hosted on an external PACS or Drive.</small>
           </div>
         </div>
 
-        <div className="grid grid-2" style={{ alignItems: "end" }}>
+        <div className="grid grid-2" style={{ alignItems: "end", marginTop: "1rem" }}>
           <div>
-            <label>Your role</label>
-            <input defaultValue={userRole} readOnly style={{ background: "#eee" }} />
-            <small className="muted">This is based on your hospital username—no need to switch login types.</small>
+            <label>Logged in as</label>
+            <div style={{ background: "#f1f5f9", padding: "0.625rem", borderRadius: "0.5rem", color: "#64748b", fontSize: "0.875rem" }}>
+              {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+            </div>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <button type="submit" disabled={submitting || !readyToSave}>
-              {submitting ? "Saving..." : readyToSave ? "Add Report" : "Fill required fields"}
+            <button type="submit" disabled={submitting || !readyToSave} style={{ minWidth: "150px" }}>
+              {submitting ? "Saving..." : readyToSave ? "Save Report" : "Fill Required Fields"}
             </button>
           </div>
         </div>
