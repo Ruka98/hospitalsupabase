@@ -23,16 +23,17 @@ export default async function AdminPage() {
       <div className="grid grid-2">
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Add Staff</h3>
+          <p><small className="muted">Roles mirror a hospital team: Doctors lead care, Nurses coordinate bedside work, Radiologists handle imaging, Admin keeps operations running.</small></p>
           <form action="/api/admin/add-staff" method="post" className="grid">
             <div className="grid grid-2">
               <div><label>Name</label><input name="name" required /></div>
               <div>
                 <label>Role</label>
                 <select name="role" defaultValue="doctor">
-                  <option value="doctor">Doctor</option>
+                  <option value="doctor">Doctor (Physician)</option>
                   <option value="nurse">Nurse</option>
                   <option value="radiologist">Radiologist</option>
-                  <option value="admin">Admin</option>
+                  <option value="admin">Admin / Operations</option>
                 </select>
               </div>
             </div>

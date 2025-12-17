@@ -29,57 +29,89 @@ export default async function DoctorPage() {
       </div>
 
       <div className="grid grid-2">
-        <div className="card">
-          <h3 style={{ marginTop: 0 }}>Assign Patient to Staff</h3>
-          <form action="/api/doctor/create-assignment" method="post" className="grid">
-            <div>
-              <label>Patient</label>
-              <select name="patient_id" required>
-                {(patients ?? []).map((p:any) => <option key={p.id} value={p.id}>{p.name} (#{p.id})</option>)}
-              </select>
-            </div>
-
-            <div className="grid grid-2">
+        <div className="grid">
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Assign Patient to Staff</h3>
+            <p><small className="muted">Assign a nurse or radiologist and they will be notified instantly.</small></p>
+            <form action="/api/doctor/create-assignment" method="post" className="grid">
               <div>
-                <label>Service Type</label>
-                <input name="service_type" placeholder="ECG / Cardio / X-Ray / CT ..." required />
-              </div>
-              <div>
-                <label>Status</label>
-                <select name="status" defaultValue="assigned">
-                  <option value="assigned">assigned</option>
-                  <option value="in_progress">in_progress</option>
-                  <option value="done">done</option>
-                  <option value="cancelled">cancelled</option>
+                <label>Patient</label>
+                <select name="patient_id" required>
+                  {(patients ?? []).map((p:any) => <option key={p.id} value={p.id}>{p.name} (#{p.id})</option>)}
                 </select>
               </div>
-            </div>
 
-            <div className="grid grid-2">
+              <div className="grid grid-2">
+                <div>
+                  <label>Service Type</label>
+                  <input name="service_type" placeholder="ECG / Cardio / X-Ray / CT ..." required />
+                </div>
+                <div>
+                  <label>Status</label>
+                  <select name="status" defaultValue="assigned">
+                    <option value="assigned">assigned</option>
+                    <option value="in_progress">in_progress</option>
+                    <option value="done">done</option>
+                    <option value="cancelled">cancelled</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-2">
+                <div>
+                  <label>Nurse (optional, available only)</label>
+                  <select name="nurse_id" defaultValue="">
+                    <option value="">None</option>
+                    {(nurses ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label>Radiologist (optional, available only)</label>
+                  <select name="radiologist_id" defaultValue="">
+                    <option value="">None</option>
+                    {(radiologists ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
+                  </select>
+                </div>
+              </div>
+
               <div>
-                <label>Nurse (optional, available only)</label>
-                <select name="nurse_id" defaultValue="">
-                  <option value="">None</option>
-                  {(nurses ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
-                </select>
+                <label>Notes (optional)</label>
+                <textarea name="notes" rows={3} placeholder="Any clinical notes for staff..." />
+              </div>
+
+              <button type="submit">Create Assignment</button>
+              <small className="muted">Assigned nurse/radiologist will receive a notification.</small>
+            </form>
+          </div>
+
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Document & upload</h3>
+            <p><small className="muted">Add a clinical note, scan link, or imaging report directly to the patient record.</small></p>
+            <form action="/api/staff/add-report" method="post" className="grid">
+              <div className="grid grid-2">
+                <div>
+                  <label>Patient</label>
+                  <select name="patient_id" required>
+                    {(patients ?? []).map((p:any) => <option key={p.id} value={p.id}>{p.name} (#{p.id})</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label>Report Type</label>
+                  <input name="report_type" placeholder="Clinical note / Imaging / Scan" required />
+                </div>
               </div>
               <div>
-                <label>Radiologist (optional, available only)</label>
-                <select name="radiologist_id" defaultValue="">
-                  <option value="">None</option>
-                  {(radiologists ?? []).map((s:any) => <option key={s.id} value={s.id}>{s.name}{s.category ? ` • ${s.category}` : ""}</option>)}
-                </select>
+                <label>Summary</label>
+                <textarea name="summary" rows={4} placeholder="Key findings, impressions, or bedside updates" required />
               </div>
-            </div>
-
-            <div>
-              <label>Notes (optional)</label>
-              <textarea name="notes" rows={3} placeholder="Any clinical notes for staff..." />
-            </div>
-
-            <button type="submit">Create Assignment</button>
-            <small className="muted">Assigned nurse/radiologist will receive a notification.</small>
-          </form>
+              <div>
+                <label>Attachment or scan URL</label>
+                <input name="file_url" placeholder="Paste image, PDF, or cloud drive link to the scan" />
+                <small className="muted">Use any secure file URL (PACS viewer, Drive, etc.).</small>
+              </div>
+              <button type="submit">Save report to chart</button>
+            </form>
+          </div>
         </div>
 
         <div className="card">
