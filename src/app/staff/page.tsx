@@ -31,8 +31,8 @@ export default async function StaffPage() {
       <div className="grid grid-2">
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Add report / scan result</h3>
-          <p><small className="muted">Nurses, radiologists, and physicians can attach bedside notes, imaging PDFs, or cloud scan links directly to the chart.</small></p>
-          <form action="/api/staff/add-report" method="post" className="grid">
+          <p><small className="muted">Nurses, radiologists, and physicians can attach bedside notes, imaging PDFs, or cloud scans directly to the chart.</small></p>
+          <form action="/api/staff/add-report" method="post" className="grid" encType="multipart/form-data">
             <div className="grid grid-2">
               <div>
                 <label>Patient</label>
@@ -51,17 +51,26 @@ export default async function StaffPage() {
             </div>
             <div className="grid grid-2">
               <div>
-                <label>Attachment / scan URL</label>
-                <input name="file_url" placeholder="https://drive.google.com/... or https://pacs/hospital-scan" />
-                <small className="muted">Paste an image, PDF, or secure viewer link for the scan.</small>
+                <label>Upload image (PNG, JPG, PDF)</label>
+                <input name="file" type="file" accept="image/png,image/jpeg,application/pdf" />
+                <small className="muted">Attach a bedside photo, scan export, or signed note. Files are stored securely.</small>
               </div>
+              <div>
+                <label>Attachment / scan URL (optional)</label>
+                <input name="file_url" placeholder="https://drive.google.com/... or https://pacs/hospital-scan" />
+                <small className="muted">Use a secure viewer link when needed; otherwise upload the file above.</small>
+              </div>
+            </div>
+            <div className="grid grid-2" style={{ alignItems: "end" }}>
               <div>
                 <label>Your role on this upload</label>
                 <input name="role_hint" defaultValue={user.staff.role} readOnly />
               </div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button type="submit">Add Report</button>
+              </div>
             </div>
-            <button type="submit">Add Report</button>
-            <small className="muted">Doctors will see this in patient history.</small>
+            <small className="muted">Doctors will see this in patient history. Uploads and links are both supported.</small>
           </form>
         </div>
 
